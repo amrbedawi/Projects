@@ -1,0 +1,113 @@
+Amr Bedawi aab73
+
+(1) Run the program BenchmarkForAutocomplete and copy/paste the 
+results here this for #matches = 20
+
+search	size	#match	binary	brute
+	456976	20	0.1954	0.0220
+a	17576	20	0.0048	0.0427
+b	17576	20	0.0054	0.0105
+c	17576	20	0.0050	0.0058
+x	17576	20	0.0052	0.0097
+y	17576	20	0.0068	0.0062
+z	17576	20	0.0061	0.0073
+aa	676	20	0.0002	0.0087
+az	676	20	0.0002	0.0065
+za	676	20	0.0001	0.0068
+zz	676	20	0.0002	0.0084
+
+
+(2) Run the program again for #matches = 10000, paste the results, 
+and then make any conclusions about how the # matches
+effects the runtime. 
+
+-- Based on the data my computer produced, when the number of matches increased from 20 to 10000, the amount of time it took to do a binary search decreased. This decrease is not really significant. When searching " " the time decreased by 0.01 seconds. For b, c, x, y, and z the time decreased by an average of 0.002 seconds. When searching for aa, az, za and zz the timing for the two were nearly identical, and if they differed, it was only by 0.0001 seconds. For brute autocomplete, the results fluctuated. When searching for a, b, c and z the time decreased when matches increased. Yet, the time increased for all other searches when matches increased; however, these changes were not significant. For example, when searching for z, the runtime decreased from 0.0073 seconds to 0.0068 seconds. I think if the difference between matches was larger, we should see a more stark contrast between the two sets of data. But based on my numbers, I conclude that #matches does not impact runtime that much. 
+
+search	size	#match	binary	brute
+	456976	10000	0.1878	0.0253
+a	17576	10000	0.0057	0.0145
+b	17576	10000	0.0036	0.0066
+c	17576	10000	0.0035	0.0082
+x	17576	10000	0.0041	0.0065
+y	17576	10000	0.0035	0.0114
+z	17576	10000	0.0037	0.0068
+aa	676	10000	0.0001	0.0034
+az	676	10000	0.0001	0.0038
+za	676	10000	0.0001	0.0035
+zz	676	10000	0.0002	0.0034
+
+(3) Copy/paste the code from BruteAutocomplete.topMatches below. 
+Explain what the Big-Oh complexity of the entire loop: 
+for(Term t : myTerms) {...} 
+is in terms of N, the number of elements in myTerms and 
+M, the number of terms that match the prefix. 
+Assume that every priority-queue operation runs in O(log k) time. 
+Explain your answer which should be in terms of N, M, and k.
+
+-- The first for loop [for (Term t: myTerms) runs N times because it must go through the loop for each Term. There are three if statements in the loop. Each condition in the if statement is 0(1). There are three priority-queue operations in the loop, each of which is 0(log k). This means that this loop has a run time of O(N log k) because the coefficient of three can be ignored in O(log k). The second loop [for (int i = 0; i < numResults; i++)] has a runtime of O(M) because it must add each match to the linked list. 
+
+public List<Term> topMatches(String prefix, int k) {
+		if (k < 0) {
+			throw new IllegalArgumentException("Illegal value of k:"+k);
+		}
+		
+		// maintain pq of size k
+		PriorityQueue<Term> pq = new PriorityQueue<Term>(10, new Term.WeightOrder());
+		for (Term t : myTerms) {
+			if (!t.getWord().startsWith(prefix))
+				continue;
+			if (pq.size() < k) {
+				pq.add(t);
+			} else if (pq.peek().getWeight() < t.getWeight()) {
+				pq.remove();
+				pq.add(t);
+			}
+		}
+		int numResults = Math.min(k, pq.size());
+		LinkedList<Term> ret = new LinkedList<>();
+		for (int i = 0; i < numResults; i++) {
+			ret.addFirst(pq.remove());
+		}
+		return ret;
+	}
+
+(4) Explain why the last for loop in BruteAutocomplete.topMatches 
+uses a LinkedList (and not an ArrayList) 
+AND why the PriorityQueue uses Term.WeightOrder to get 
+the top k heaviest matches -- rather than 
+using Term.ReverseWeightOrder.
+
+-- Using a LinkedList is more efficient than using an ArrayList. Adding an element to the front of a linked list is 0(1) but adding an element to the front of an array list is O(N) where N is the number of elements in the list. This is because when adding to the front of an array list, all of the elements have to shift over. A priority queue places a higher priority on elements based on the comparator it is given. Tt does not sort based on ascending order, but rather sorts based on whatever element is deemed higher by the comparator. This means a priority queue places things in descending order based on the comparator given. If we gave it the reverse weight order comparator, then lower weighted elements would be given a higher priority and moved to the front of the queue. This is not what we want, so we use the weight order comparator because this will lead the queue to give priority to higher weighted terms. 
+
+
+(5) Explain what the runtime of the 
+BinarySearchAutocomplete.topMatches code that you 
+implemented is by copy/pasting the code below 
+and explaining your answer in terms of N, M, and k.
+
+-- The creation of the term object and the two array lists each is an O(1) operation. Calling firstIndexOf is O(log N) because firstIndexOf called BinarySearchLibrary.firstIndex which is a binary search and we know binary search has a complexity of O(log N). The same is true when calling lastIndexOf. The first for loop [for(int p = first; p <= last; p++)] is O(M) because it adds each match to the end of an array list and we know that adding in this way is an O(1) operation. Sorting the matches the code produces is  O(M log M). The second for loop [for(int g = 0; g < k; g++)] is O(k) because it adds the first k matches one by one to the end of a different array list. Adding these components together, my topMatches runtime is O(log N + M logM + M + k).  
+
+
+public List<Term> topMatches(String prefix, int k) {
+	if(prefix == null) throw new NullPointerException("Prefix cannot be null"); 
+		
+		Term term = new Term(prefix, 0); 
+		ArrayList<Term> matches = new ArrayList<>(); 
+		ArrayList<Term> list = new ArrayList<>();
+		
+		int first = firstIndexOf(myTerms, term, new Term.PrefixOrder(prefix.length())); 
+
+		int last = lastIndexOf(myTerms, term, new Term.PrefixOrder(prefix.length())); 
+
+		if(first < 0 || last < 0) return list; 
+		for(int p = first; p <= last; p++) {
+			matches.add(myTerms[p]); 
+		}
+		Collections.sort(matches, new Term.ReverseWeightOrder());
+		if(matches.size() <= k) return matches; 
+		if(k == 0) return list;
+		for(int g = 0; g < k; g++) {
+			list.add(matches.get(g)); 
+		}
+		return list; 
+	}
