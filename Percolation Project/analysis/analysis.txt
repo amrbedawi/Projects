@@ -1,0 +1,62 @@
+Amr Bedawi
+aab73
+
+Copy/Paste results from PercolationStats using PercolationDFS
+
+simulation data for 20 trials
+grid	mean	stddev	time
+100	0.593	0.014	0.973
+200	0.591	0.010	11.145
+400	0.590	0.006	153.894
+
+Copy/Paste results from PercolationStats using PercolationDFSFast
+simulation data for 20 trials
+grid	mean	stddev	time
+100	0.593	0.014	0.163
+200	0.591	0.010	0.198
+400	0.590	0.006	0.918
+800	0.594	0.004	5.123
+
+
+Copy/Paste results from PercolationStats using PercolationBFS
+
+simulation data for 20 trials
+grid	mean	stddev	time
+100	0.593	0.014	0.193
+200	0.591	0.010	0.178
+400	0.590	0.006	0.800
+800	0.594	0.004	5.087
+1600	0.592	0.002	31.632
+3200	0.593	0.001	183.744
+
+
+Copy/Paste results from PercolationStats using PercolationUF 
+with the QuickUWPC UnionFind implementation.
+
+simulation data for 20 trials
+grid	mean	stddev	time
+100	0.593	0.014	0.092
+200	0.591	0.010	0.156
+400	0.590	0.006	0.708
+800	0.594	0.004	4.536
+1600	0.592	0.002	21.828
+3200	0.593	0.001	118.318
+
+1. How does doubling the grid size affect running time (keeping # trials fixed)
+~~~ In general, doubling the grid size results an increase in runtime by a factor of roughly five. For example, doubling from 200 to 400 results in an increase in runtime by a factor of 4.538 and doubling from 1600 to 3200 results in an increase by a factor of 5.42. There is one instance where this increase does not follow the pattern. When doubling the grid from 100 to 200 runtime only increases by a factor of 1.69; It is likely that the difference between 100 and 200 is negligible in this code so runtime is not affected as much. 
+
+2. How does doubling the number of trials affect running time.
+~~~ Doubling the number of trials doubles run time. When I increased trials from 20 to 40 I got the results below. For each grid size, time increases by roughly a factor of two. For example for grid size 800, the time increased from 4.536 to 9.244  (2.03 times greater). For a grid size of 1600, the time increased from .0708 to 1.549 (2.19 times greater), and for a grid size of 1600, time increased from 21.828 to 45.029 (2.06 times greater). Of course these are not exactly two-fold increases but they are roughly equivalent to that. Increasing the trial has no affect on how doubling grid size changes run time. When trials was increased to 40, doubling the grid size still results in roughly a five-fold increase in run time. For example, doubling grid size from 800 t0 1600 increases time from 9.244 to 45.029 which is 4.87 times greater.
+ 
+simulation data for 40 trials
+grid	mean	stddev	time
+100	0.594	0.015	0.178
+200	0.591	0.009	0.357
+400	0.591	0.005	1.549
+800	0.593	0.004	9.244
+1600	0.593	0.002	45.029
+3200	0.593	0.001	241.669
+
+3. Estimate the largest grid size you can run in 24 hours with 20 trials. Explain your reasoning.
+
+The largest grid size is 512,000. There are 86,400 seconds in 24 hours. If we use the idea that each time the grid is doubled time increases by five then when you reach a grid of size 512,000 run time is roughly 73,948.75 seconds. I got this by multiplying my runtime of 118.318 seconds by five each time I double my grid size. I was able to do this until I reached a runtime of 73,948.75 seconds for a grid size of 512,000. 
